@@ -663,9 +663,6 @@ popd
 %{_libdir}/dri/vkms_dri.so
 %{_libdir}/dri/zynqmp-dpsub_dri.so
 %endif
-%if 0%{?with_vulkan_hw}
-%{_libdir}/dri/zink_dri.so
-%endif
 
 %if 0%{?with_va}
 %files va-drivers
@@ -724,6 +721,7 @@ popd
 %{_libdir}/libvulkan_powervr_mesa.so
 %{_datadir}/vulkan/icd.d/powervr_mesa_icd.*.json
 %endif
+%{_libdir}/dri/zink_dri.so
 %endif
 
 %changelog
