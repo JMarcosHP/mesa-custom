@@ -511,10 +511,10 @@ popd
 %{_libdir}/pkgconfig/osmesa.pc
 
 %files libgbm
+%{_libdir}/gbm/dri_gbm.so
 %{_libdir}/libgbm.so.1
 %{_libdir}/libgbm.so.1.*
 %files libgbm-devel
-%{_libdir}/gbm/dri_gbm.so
 %{_libdir}/libgbm.so
 %{_includedir}/gbm.h
 %{_libdir}/pkgconfig/gbm.pc
