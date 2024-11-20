@@ -81,6 +81,10 @@ Source1:        Mesa-MLAA-License-Clarification-Email.txt
 
 Patch10:        gnome-shell-glthread-disable.patch
 
+# silence some vulkan loader issues
+Patch20:        broadcom-fix-init-error.patch
+Patch21:        0001-venus-handle-device-probing-properly.patch
+
 BuildRequires:  meson >= 1.3.0
 BuildRequires:  gcc
 BuildRequires:  gcc-c++
