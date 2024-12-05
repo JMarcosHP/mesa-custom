@@ -67,7 +67,7 @@
 
 Name:           mesa
 Summary:        Mesa graphics libraries
-%global ver 24.3.0
+%global ver 24.3.1
 Version:        %{lua:ver = string.gsub(rpm.expand("%{ver}"), "-", "~"); print(ver)}
 Release:        %autorelease
 License:        MIT AND BSD-3-Clause AND SGI-B-2.0
@@ -80,10 +80,6 @@ Source0:        https://archive.mesa3d.org/mesa-%{ver}.tar.xz
 Source1:        Mesa-MLAA-License-Clarification-Email.txt
 
 Patch10:        gnome-shell-glthread-disable.patch
-
-# silence some vulkan loader issues
-Patch20:        broadcom-fix-init-error.patch
-Patch21:        0001-venus-handle-device-probing-properly.patch
 
 BuildRequires:  meson >= 1.3.0
 BuildRequires:  gcc
