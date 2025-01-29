@@ -50,6 +50,8 @@ jobs:
       # Finish workflow if no changes found
       - name: Skip if no changes
         if: env.HAS_CHANGES == 'false'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: echo "No changes detected. Exiting."
 
       # Push to GitHub
@@ -57,5 +59,6 @@ jobs:
         if: env.HAS_CHANGES == 'true'
         run: |
           cd fedora-mesa
-          git push --force https://github.com/JMarcosHP/mesa-custom.git rawhide:rawhide
+          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/JMarcosHP/mesa-custom.git
+          git push --force origin rawhide:rawhide
 
