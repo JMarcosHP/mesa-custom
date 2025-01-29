@@ -98,5 +98,6 @@ jobs:
 
           # Push
           git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/JMarcosHP/mesa-custom.git
+          git add mesa.spec
           git commit -a -s -m "Add additional video codecs"
           git push --force origin rawhide:production
