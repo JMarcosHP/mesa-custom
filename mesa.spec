@@ -69,7 +69,7 @@ Name:           mesa
 Summary:        Mesa graphics libraries
 %global ver 24.3.4
 Version:        %{lua:ver = string.gsub(rpm.expand("%{ver}"), "-", "~"); print(ver)}
-Release:        %autorelease
+Release:        1.gitcf285f5%{?dist}
 License:        MIT AND BSD-3-Clause AND SGI-B-2.0
 URL:            http://www.mesa3d.org
 
@@ -411,6 +411,7 @@ export MESON_PACKAGE_CACHE_DIR="%{cargo_registry}/"
 %define _lto_cflags %{nil}
 
 %meson \
+  -Dvideo-codecs=all \
   -Dplatforms=x11,wayland \
   -Dosmesa=true \
 %if 0%{?with_hardware}
