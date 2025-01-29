@@ -26,17 +26,16 @@ jobs:
 
           # Clone Github repo
           cd ..
-          git clone --single-branch --branch rawhide https://github.com/JMarcosHP/mesa-custom.git github-mesa
+          git clone --single-branch --branch rawhide https://github.com/JMarcosHP/mesa-custom.git github-mesa || true
           cd github-mesa
-          git remote add mirror https://github.com/JMarcosHP/mesa-custom.git
-          git fetch mirror rawhide || true
+          git fetch origin rawhide || true
 
       # Check for changes
       - name: Check for changes
         id: check
         run: |
           FEDORA_COMMIT=$(cd fedora-mesa && git rev-parse upstream/rawhide)
-          GITHUB_COMMIT=$(cd github-mesa && git rev-parse mirror/rawhide || echo "none")
+          GITHUB_COMMIT=$(cd github-mesa && git rev-parse origin/rawhide || echo "none")
 
           echo "Fedora latest commit: $FEDORA_COMMIT"
           echo "GitHub latest commit: $GITHUB_COMMIT"
@@ -59,6 +58,6 @@ jobs:
         if: env.HAS_CHANGES == 'true'
         run: |
           cd fedora-mesa
-          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/JMarcosHP/mesa-custom.git
+          git remote set-url origin https://oauth2:${GITHUB_TOKEN}@github.com/JMarcosHP/mesa-custom.git
           git push --force origin rawhide:rawhide
 
