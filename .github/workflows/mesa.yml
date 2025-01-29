@@ -81,11 +81,12 @@ jobs:
           # Clone the rawhide branch and production branch
           git clone --single-branch --branch rawhide https://github.com/JMarcosHP/mesa-custom.git rawhide
           git clone --single-branch --branch production https://github.com/JMarcosHP/mesa production
-
+          pwd
           ls
 
           # Get the release number
           cd production
+          pwd
           ls
           RELEASE_NUMBER=$(grep -oP '^Release:\s*\K\d+' mesa.spec)
           cd ..
@@ -105,6 +106,5 @@ jobs:
 
           # Push
           git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/JMarcosHP/mesa-custom.git
-          git add mesa.spec
           git commit -a -s -m "Add additional video codecs"
           git push --force origin rawhide:production
