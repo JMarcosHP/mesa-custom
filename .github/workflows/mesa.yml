@@ -2,8 +2,14 @@ name: Mirror & Update
 
 on:
   schedule:
-    - cron: '*/5 * * * *' # run every 5 minutes
-  workflow_dispatch: # run on workflow dispatch
+    - cron: '*/10 * * * *' # run every 10 minutes
+  workflow_dispatch:
+    inputs:
+      date:
+        description: 'Date to run the workflow'
+        required: true
+        type: string
+        default: 'in 10 minutes' # run on workflow dispatch
 
 jobs:
   mirror-update:
@@ -73,5 +79,3 @@ jobs:
           git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/JMarcosHP/mesa-custom.git
           git commit -a -s -m "Add additional video codecs"
           git push --force origin rawhide:production
-
-
