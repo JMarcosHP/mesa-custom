@@ -20,7 +20,7 @@ jobs:
       - name: Clone Fedora repo
         run: |
           git clone --single-branch --branch rawhide https://src.fedoraproject.org/rpms/mesa.git
-          cd mesa
+          cd fedora-mesa
           git remote add upstream https://src.fedoraproject.org/rpms/mesa.git
           git fetch upstream rawhide
 
@@ -28,7 +28,7 @@ jobs:
       - name: Check for changes
         id: changes
         run: |
-          cd mesa
+          cd fedora-mesa
           git fetch upstream rawhide
           git diff --exit-code upstream/rawhide || echo "Changes found"
         # Use output to determine changes
