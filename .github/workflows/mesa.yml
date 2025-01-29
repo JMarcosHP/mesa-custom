@@ -16,15 +16,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Configure git
       - name: Set up git
         run: |
+          # Configure git
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
       
-      # Clone Fedora mesa source code
       - name: Clone Fedora repo
         run: |
+          # Clone Fedora mesa source code from src.fedoraproject.org
           git clone --single-branch --branch rawhide https://src.fedoraproject.org/rpms/mesa.git fedora-mesa
           cd fedora-mesa
           git remote add upstream https://src.fedoraproject.org/rpms/mesa.git
@@ -36,16 +36,17 @@ jobs:
           cd github-mesa
           git fetch origin rawhide || true
 
-      # Check for changes
       - name: Check for changes
         id: check
         run: |
+          # Get the latest commit hashes from both repos
           FEDORA_COMMIT=$(cd fedora-mesa && git rev-parse upstream/rawhide)
           GITHUB_COMMIT=$(cd github-mesa && git rev-parse origin/rawhide || echo "none")
 
           echo "Fedora latest commit: $FEDORA_COMMIT"
           echo "GitHub latest commit: $GITHUB_COMMIT"
 
+          # Compare both commits
           if [ "$FEDORA_COMMIT" != "$GITHUB_COMMIT" ]; then
             echo "HAS_CHANGES=true" >> $GITHUB_ENV
           else
@@ -63,9 +64,10 @@ jobs:
         env: 
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Push mesa rawhide branch changes
           cd fedora-mesa
           git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/JMarcosHP/mesa-custom.git
-          git push --force origin rawhide:rawhide
+          git push --force-with-lease origin rawhide:rawhide
       
       # Update Production Branch
       - name: Update Production Branch
@@ -73,10 +75,28 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git clone --single-branch --branch rawhide https://github.com/JMarcosHP/mesa-custom.git production
+          # Clone the rawhide branch and production branch
+          git clone --single-branch --branch rawhide https://github.com/JMarcosHP/mesa-custom.git rawhide
+          git clone --single-branch --branch production https://github.com/JMarcosHP/mesa production
+
+          # Get the release number
           cd production
+          RELEASE_NUMBER=$(grep -oP '^Release:\s*\K\d+' mesa.spec)
+          cd ..
+
+          # Update Release commit
+          cd rawhide
+          SHORTCOMMIT=${FEDORA_COMMIT:0:7}
+          RELEASE_NUMBER=$((RELEASE_NUMBER + 1))
+          sed -i "s/^Release:        %autorelease/Release:        ${RELEASE_NUMBER}.git$SHORTCOMMIT%{?dist}/" mesa.spec
+
+          # Insert codecs build flag
           sed -i '/^%meson \\/a \ \ -Dvideo-codecs=all \\' mesa.spec
+
+          # Remove usused junk
           rm sources
+
+          # Push
           git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/JMarcosHP/mesa-custom.git
           git commit -a -s -m "Add additional video codecs"
-          git push --force origin rawhide:production
+          git push --force-with-lease origin rawhide:production
