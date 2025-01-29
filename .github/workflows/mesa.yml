@@ -6,7 +6,7 @@ on:
   workflow_dispatch: # run on workflow dispatch
 
 jobs:
-  mirror:
+  mirror-update:
     runs-on: ubuntu-latest
 
     steps:
@@ -60,4 +60,18 @@ jobs:
           cd fedora-mesa
           git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/JMarcosHP/mesa-custom.git
           git push --force origin rawhide:rawhide
+      
+      # Update Production Branch
+      - name: Update Production Branch
+        if: env.HAS_CHANGES == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git clone --single-branch --branch rawhide https://github.com/JMarcosHP/mesa-custom.git production
+          cd production
+          sed -i '/^%meson \\/a \ \ -Dvideo-codecs=all \\' mesa.spec
+          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/JMarcosHP/mesa-custom.git
+          git commit -a -s -m "Add additional video codecs"
+          git push --force rawhide:production
+
 
