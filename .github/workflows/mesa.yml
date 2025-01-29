@@ -37,6 +37,7 @@ jobs:
           git fetch origin rawhide || true
           cd .. 
           pwd
+          ls
 
       - name: Check for changes
         id: check
@@ -56,13 +57,13 @@ jobs:
           fi
 
       # Finish workflow if no changes found
-      - name: Skip if no changes
-        if: env.HAS_CHANGES == 'false'
-        run: echo "No changes detected. Exiting."
+      #- name: Skip if no changes
+      #  if: env.HAS_CHANGES == 'false'
+      #  run: echo "No changes detected. Exiting."
 
       # Push to GitHub
       - name: Push to GitHub
-        if: env.HAS_CHANGES == 'true'
+       # if: env.HAS_CHANGES == 'true'
         env: 
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -73,7 +74,7 @@ jobs:
       
       # Update Production Branch
       - name: Update Production Branch
-        if: env.HAS_CHANGES == 'true'
+        #if: env.HAS_CHANGES == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
