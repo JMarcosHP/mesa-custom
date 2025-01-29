@@ -2,7 +2,7 @@ name: Mirror & Update
 
 on:
   schedule:
-    - cron: '0 * * * *' # run every hour
+    - cron: '* * * * *' # run every hour
   workflow_dispatch: # run on workflow dispatch
 
 jobs:
@@ -63,7 +63,7 @@ jobs:
       
       # Update Production Branch
       - name: Update Production Branch
-        
+        if: env.HAS_CHANGES == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
