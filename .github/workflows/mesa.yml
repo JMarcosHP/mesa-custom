@@ -80,7 +80,7 @@ jobs:
         run: |
           # Clone the rawhide branch and production branch
           git clone --single-branch --branch rawhide https://github.com/JMarcosHP/mesa-custom.git rawhide
-          git clone --single-branch --branch production https://github.com/JMarcosHP/mesa production
+          git clone --single-branch --branch production https://github.com/JMarcosHP/mesa-custom.git production
           pwd
           ls
 
