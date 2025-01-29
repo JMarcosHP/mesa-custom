@@ -56,8 +56,10 @@ jobs:
       # Push to GitHub
       - name: Push to GitHub
         if: env.HAS_CHANGES == 'true'
+        env: 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           cd fedora-mesa
-          git remote set-url origin https://oauth2:${GITHUB_TOKEN}@github.com/JMarcosHP/mesa-custom.git
+          git remote set-url origin https://{GITHUB_TOKEN}@github.com/JMarcosHP/mesa-custom.git
           git push --force origin rawhide:rawhide
 
