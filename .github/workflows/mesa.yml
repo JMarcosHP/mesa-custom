@@ -47,6 +47,10 @@ jobs:
           echo "Fedora latest commit: $FEDORA_COMMIT"
           echo "GitHub latest commit: $GITHUB_COMMIT"
 
+          # Save the Fedora commit to GITHUB_ENV for later use
+          echo "FEDORA_COMMIT=$FEDORA_COMMIT" >> $GITHUB_ENV
+          echo "GITHUB_COMMIT=$GITHUB_COMMIT" >> $GITHUB_ENV
+
           # Compare both commits
           if [ "$FEDORA_COMMIT" != "$GITHUB_COMMIT" ]; then
             echo "HAS_CHANGES=true" >> $GITHUB_ENV
@@ -88,7 +92,7 @@ jobs:
 
           # Update Release commit
           cd rawhide
-          echo "Fedora commit: $FEDORA_COMMIT"
+          echo "Fedora commit: ${{ env.FEDORA_COMMIT }}"
           SHORTCOMMIT=${FEDORA_COMMIT:0:7}
           echo "Short commit: $SHORTCOMMIT"
           RELEASE_NUMBER=$((RELEASE_NUMBER + 1))
