@@ -76,6 +76,7 @@ jobs:
           git clone --single-branch --branch rawhide https://github.com/JMarcosHP/mesa-custom.git production
           cd production
           sed -i '/^%meson \\/a \ \ -Dvideo-codecs=all \\' mesa.spec
+          rm sources
           git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/JMarcosHP/mesa-custom.git
           git commit -a -s -m "Add additional video codecs"
           git push --force origin rawhide:production
