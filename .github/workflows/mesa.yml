@@ -67,7 +67,7 @@ jobs:
           # Push mesa rawhide branch changes
           cd fedora-mesa
           git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/JMarcosHP/mesa-custom.git
-          git push --force-with-lease origin rawhide:rawhide
+          git push --force origin rawhide:rawhide
       
       # Update Production Branch
       - name: Update Production Branch
@@ -99,4 +99,4 @@ jobs:
           # Push
           git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/JMarcosHP/mesa-custom.git
           git commit -a -s -m "Add additional video codecs"
-          git push --force-with-lease origin rawhide:production
+          git push --force origin rawhide:production
