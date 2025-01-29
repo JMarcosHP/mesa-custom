@@ -2,7 +2,7 @@ name: Mirror & Update
 
 on:
   schedule:
-    - cron: '*/5 * * * *' # run every minute
+    - cron: '*/5 * * * *' # run every 5 minutes
   workflow_dispatch: # run on workflow dispatch
 
 jobs:
