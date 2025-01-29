@@ -2,14 +2,14 @@ name: Mirror & Update
 
 on:
   schedule:
-    - cron: '*/10 * * * *' # run every 10 minutes
+    - cron: '0 * * * *' # run every hour
   workflow_dispatch:
     inputs:
       date:
         description: 'Date to run the workflow'
         required: true
         type: string
-        default: 'in 10 minutes' # run on workflow dispatch
+        default: 'in 1 hour' # run on workflow dispatch
 
 jobs:
   mirror-update:
