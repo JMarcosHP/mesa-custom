@@ -7,12 +7,12 @@ on:
 
 jobs:
   mirror:
-    runs-on: fedora-latest
+    runs-on: ubuntu-latest
 
     steps:
       # Install git
       - name: Install git
-        run: dnf install git
+        run: apt install git
 
       # Configure git
       - name: Set up git
