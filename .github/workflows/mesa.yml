@@ -35,6 +35,8 @@ jobs:
           git clone --single-branch --branch rawhide https://github.com/JMarcosHP/mesa-custom.git github-mesa || true
           cd github-mesa
           git fetch origin rawhide || true
+          cd .. 
+          pwd
 
       - name: Check for changes
         id: check
