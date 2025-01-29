@@ -35,5 +35,5 @@ https://rpmfusion.org/Howto/Multimedia
 Run the following command in your terminal or use the GUI software management tool on your system.
 
   ```bash
-  sudo dnf  update --refresh   -y
-  sudo dnf install mesa-va-drivers mesa-vdpau-drivers --repo copr/jmarcoshp
+  sudo dnf check-update -y
+  sudo dnf install mesa-va-drivers mesa-vdpau-drivers --repo copr:copr.fedorainfracloud.org:jmarcoshp:mesa-custom
