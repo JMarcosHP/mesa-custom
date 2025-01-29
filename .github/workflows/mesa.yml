@@ -36,8 +36,6 @@ jobs:
           cd github-mesa
           git fetch origin rawhide || true
           cd .. 
-          pwd
-          ls
 
       - name: Check for changes
         id: check
@@ -81,20 +79,16 @@ jobs:
           # Clone the rawhide branch and production branch
           git clone --single-branch --branch rawhide https://github.com/JMarcosHP/mesa-custom.git rawhide
           git clone --single-branch --branch production https://github.com/JMarcosHP/mesa-custom.git production
-          pwd
-          ls
 
           # Get the release number
           cd production
-          pwd
-          ls
           RELEASE_NUMBER=$(grep -oP '^Release:\s*\K\d+' mesa.spec)
           echo "Release number: $RELEASE_NUMBER"
           cd ..
 
           # Update Release commit
           cd rawhide
-          ls
+          echo "Fedora commit: $FEDORA_COMMIT"
           SHORTCOMMIT=${FEDORA_COMMIT:0:7}
           echo "Short commit: $SHORTCOMMIT"
           RELEASE_NUMBER=$((RELEASE_NUMBER + 1))
