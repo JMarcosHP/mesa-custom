@@ -63,7 +63,7 @@ jobs:
       
       # Update Production Branch
       - name: Update Production Branch
-        if: env.HAS_CHANGES == 'true'
+        
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
