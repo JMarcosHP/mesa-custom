@@ -10,10 +10,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Install git
-      - name: Install git
-        run: apt install git
-
       # Configure git
       - name: Set up git
         run: |
