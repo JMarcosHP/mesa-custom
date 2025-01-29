@@ -19,32 +19,43 @@ jobs:
       # Clone Fedora mesa source code
       - name: Clone Fedora repo
         run: |
-          git clone --single-branch --branch rawhide https://src.fedoraproject.org/rpms/mesa.git
+          git clone --single-branch --branch rawhide https://src.fedoraproject.org/rpms/mesa.git fedora-mesa
           cd fedora-mesa
           git remote add upstream https://src.fedoraproject.org/rpms/mesa.git
           git fetch upstream rawhide
 
+          # Clone Github repo
+          cd ..
+          git clone --single-branch --branch rawhide https://github.com/JMarcosHP/mesa-custom.git github-mesa
+          cd github-mesa
+          git remote add mirror https://github.com/JMarcosHP/mesa-custom.git
+          git fetch mirror rawhide || true
+
       # Check for changes
       - name: Check for changes
-        id: changes
+        id: check
         run: |
-          cd fedora-mesa
-          git fetch upstream rawhide
-          git diff --exit-code upstream/rawhide || echo "Changes found"
-        # Use output to determine changes
-        env:
-          HAS_CHANGES: $([[ "$(git diff --name-only upstream/rawhide)" != "" ]] && echo "true" || echo "false")
+          FEDORA_COMMIT=$(cd fedora-mesa && git rev-parse upstream/rawhide)
+          GITHUB_COMMIT=$(cd github-mesa && git rev-parse mirror/rawhide || echo "none")
+
+          echo "Fedora latest commit: $FEDORA_COMMIT"
+          echo "GitHub latest commit: $GITHUB_COMMIT"
+
+          if [ "$FEDORA_COMMIT" != "$GITHUB_COMMIT" ]; then
+            echo "HAS_CHANGES=true" >> $GITHUB_ENV
+          else
+            echo "HAS_CHANGES=false" >> $GITHUB_ENV
+          fi
 
       # Finish workflow if no changes found
       - name: Skip if no changes
-        if: steps.changes.outputs.HAS_CHANGES == 'false'
+        if: env.HAS_CHANGES == 'false'
         run: echo "No changes detected. Exiting."
 
       # Push to GitHub
       - name: Push to GitHub
-        if: steps.changes.outputs.HAS_CHANGES == 'true'
+        if: env.HAS_CHANGES == 'true'
         run: |
-          cd mesa
-          git remote add mirror https://github.com/JMarcosHP/mesa-custom.git
-          git push --force mirror rawhide:rawhide
+          cd fedora-mesa
+          git push --force https://github.com/JMarcosHP/mesa-custom.git rawhide:rawhide
 
