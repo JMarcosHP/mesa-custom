@@ -89,12 +89,14 @@ jobs:
           pwd
           ls
           RELEASE_NUMBER=$(grep -oP '^Release:\s*\K\d+' mesa.spec)
+          echo "Release number: $RELEASE_NUMBER"
           cd ..
 
           # Update Release commit
           cd rawhide
           ls
           SHORTCOMMIT=${FEDORA_COMMIT:0:7}
+          echo "Short commit: $SHORTCOMMIT"
           RELEASE_NUMBER=$((RELEASE_NUMBER + 1))
           sed -i "s/^Release:        %autorelease/Release:        ${RELEASE_NUMBER}.git$SHORTCOMMIT%{?dist}/" mesa.spec
 
