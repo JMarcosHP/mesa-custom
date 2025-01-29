@@ -72,6 +72,6 @@ jobs:
           sed -i '/^%meson \\/a \ \ -Dvideo-codecs=all \\' mesa.spec
           git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/JMarcosHP/mesa-custom.git
           git commit -a -s -m "Add additional video codecs"
-          git push --force rawhide:production
+          git push --force origin rawhide:production
 
 
