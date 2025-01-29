@@ -82,13 +82,17 @@ jobs:
           git clone --single-branch --branch rawhide https://github.com/JMarcosHP/mesa-custom.git rawhide
           git clone --single-branch --branch production https://github.com/JMarcosHP/mesa production
 
+          ls
+
           # Get the release number
           cd production
+          ls
           RELEASE_NUMBER=$(grep -oP '^Release:\s*\K\d+' mesa.spec)
           cd ..
 
           # Update Release commit
           cd rawhide
+          ls
           SHORTCOMMIT=${FEDORA_COMMIT:0:7}
           RELEASE_NUMBER=$((RELEASE_NUMBER + 1))
           sed -i "s/^Release:        %autorelease/Release:        ${RELEASE_NUMBER}.git$SHORTCOMMIT%{?dist}/" mesa.spec
