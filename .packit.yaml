@@ -3,10 +3,15 @@ upstream_tag_template: mesa-{version}
 
 jobs:
   - job: pull_from_upstream
-    upstream_tag_include: "^mesa-26\\.1\\..*$"
+    upstream_tag_include: "^mesa-26\\.2\\..*$"
     trigger: release
     dist_git_branches:
       - rawhide
+
+  - job: pull_from_upstream
+    upstream_tag_include: "^mesa-26\\.1\\..*$"
+    trigger: release
+    dist_git_branches:
       - f44
 
   - job: pull_from_upstream
