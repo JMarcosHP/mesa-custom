@@ -7,6 +7,7 @@ jobs:
     trigger: release
     dist_git_branches:
       - rawhide
+      - f45
 
   - job: pull_from_upstream
     upstream_tag_include: "^mesa-26\\.1\\..*$"
