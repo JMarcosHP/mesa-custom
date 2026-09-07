@@ -692,6 +692,8 @@ ln -s libGLX_mesa.so.0 %{buildroot}%{_libdir}/libGLX_system.so.0
 %{_datadir}/drirc.d/00-lavapipe-defaults.conf
 %{_libdir}/libVkLayer_MESA_device_select.so
 %{_datadir}/vulkan/implicit_layer.d/VkLayer_MESA_device_select.json
+%{_libdir}/libVkLayer_MESA_anti_lag.so
+%{_datadir}/vulkan/implicit_layer.d/VkLayer_MESA_anti_lag.json
 %if 0%{?with_virtio}
 %{_libdir}/libvulkan_virtio.so
 %{_datadir}/vulkan/icd.d/virtio_icd.*.json
