@@ -442,7 +442,7 @@ rewrite_wrap_file rustc-hash
   -Dgallium-rusticl=true \
 %endif
   -Dvulkan-drivers=%{?vulkan_drivers} \
-  -Dvulkan-layers=device-select \
+  -Dvulkan-layers=device-select,anti-lag \
   -Dgles1=enabled \
   -Dgles2=enabled \
   -Dopengl=true \
