@@ -89,7 +89,7 @@ URL:            https://mesa3d.org
 # The "Version" field for release candidates has the format: A.B.C~rcX
 # However, the tarball has the format: A.B.C-rcX.
 # The "ver" variable contains the version in the second format.
-%global ver %{gsub %version ~ -}
+%global ver %(echo %{version} | tr '~' '-')
 
 Source0:        https://archive.mesa3d.org/mesa-%{ver}.tar.xz
 # src/gallium/auxiliary/postprocess/pp_mlaa* have an ... interestingly worded license.
