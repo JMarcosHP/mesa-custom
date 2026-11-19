@@ -114,6 +114,36 @@ Source13:       https://crates.io/api/v1/crates/syn/%{rust_syn_ver}/download#/sy
 Source14:       https://crates.io/api/v1/crates/unicode-ident/%{rust_unicode_ident_ver}/download#/unicode-ident-%{rust_unicode_ident_ver}.tar.gz
 Source15:       https://crates.io/api/v1/crates/rustc-hash/%{rustc_hash_ver}/download#/rustc-hash-%{rustc_hash_ver}.tar.gz
 
+# Some dependencies are not available in CentOS, build them:
+Source100: 100-meson-source.inc
+Source101: 101-meson-prep.inc
+Source102: 102-meson-build.inc
+Source103: 103-meson-install.inc
+Source104: 104-meson-install-cleanup.inc
+Source200: 200-spirv-llvm-translator-source.inc
+Source201: 201-spirv-llvm-translator-prep.inc
+Source202: 202-spirv-llvm-translator-build.inc
+Source203: 203-spirv-llvm-translator-install-cleanup.inc
+Source300: 300-wayland-protocols-source.inc
+Source301: 301-wayland-protocols-prep.inc
+Source302: 302-wayland-protocols-build.inc
+Source303: 303-wayland-protocols-install-cleanup.inc
+Source400: 400-python3.11-source.inc
+Source401: 401-python3.11-build.inc
+
+%include %{SOURCE100}
+%include %{SOURCE200}
+%include %{SOURCE300}
+%include %{SOURCE400}
+
+%if !0%{?rhel} || 0%{?rhel} >= 10
+# Not available in CentOS 9
+%global with_libdisplay_info 1
+%global with_gles1 1
+BuildRequires:  pkgconfig(libdisplay-info)
+BuildRequires:  pkgconfig(wayland-protocols) >= 1.49
+%endif
+
 # Fix Freedreno compilation with GCC 11 (CentOS 9)
 Patch0:         0001-tu-autotune-use-unique_ptr-rp_histories_t-to-fix-GCC.patch
 
@@ -136,11 +166,9 @@ BuildRequires:  pkgconfig(expat)
 BuildRequires:  pkgconfig(zlib) >= 1.2.3
 BuildRequires:  pkgconfig(libzstd)
 BuildRequires:  pkgconfig(wayland-scanner)
-BuildRequires:  pkgconfig(wayland-protocols) >= 1.49
 BuildRequires:  pkgconfig(wayland-client) >= 1.11
 BuildRequires:  pkgconfig(wayland-server) >= 1.11
 BuildRequires:  pkgconfig(wayland-egl-backend) >= 3
-BuildRequires:  pkgconfig(libdisplay-info)
 BuildRequires:  pkgconfig(x11)
 BuildRequires:  pkgconfig(xext)
 BuildRequires:  pkgconfig(xdamage) >= 1.1
@@ -178,7 +206,10 @@ BuildRequires:  xtensor-devel
 %if 0%{?with_opencl} || 0%{?with_nvk} || 0%{?with_asahi} || 0%{?with_panfrost}
 BuildRequires:  clang-devel
 BuildRequires:  pkgconfig(SPIRV-Tools)
+%if !0%{?rhel} || 0%{?eln}
+# Dependency not available in CentOS, bundled instead
 BuildRequires:  pkgconfig(LLVMSPIRVLib)
+%endif
 %endif
 %if 0%{?with_opencl} || 0%{?with_nvk}
 BuildRequires:  bindgen
@@ -354,6 +385,10 @@ The drivers with support for the Vulkan API.
 %autosetup -n %{name}-%{ver} -p1
 cp %{SOURCE1} docs/
 
+%include %{SOURCE101}
+%include %{SOURCE201}
+%include %{SOURCE301}
+
 # Extract Rust crates meson cache directory
 %if 0%{?vendor_nvk_crates}
 mkdir subprojects/packagecache/
@@ -396,6 +431,11 @@ _EOF
 
 
 %build
+%include %{SOURCE102}
+%include %{SOURCE202}
+%include %{SOURCE302}
+%include %{SOURCE401}
+
 # ensure standard Rust compiler flags are set
 export RUSTFLAGS="%build_rustflags"
 
@@ -450,7 +490,7 @@ rewrite_wrap_file rustc-hash
 %endif
   -Dvulkan-drivers=%{?vulkan_drivers} \
   -Dvulkan-layers=device-select \
-  -Dgles1=enabled \
+  -Dgles1=%{?with_gles1:enabled}%{!?with_gles1:disabled} \
   -Dgles2=enabled \
   -Dopengl=true \
   -Dgbm=enabled \
@@ -463,6 +503,7 @@ rewrite_wrap_file rustc-hash
   -Dshared-llvm=enabled \
   -Dvalgrind=%{?with_valgrind:enabled}%{!?with_valgrind:disabled} \
   -Dbuild-tests=false \
+  -Ddisplay-info=%{?with_libdisplay_info:enabled}%{!?with_libdisplay_info:disabled} \
 %if !0%{?with_libunwind}
   -Dlibunwind=disabled \
 %endif
@@ -486,7 +527,13 @@ rewrite_wrap_file rustc-hash
 %endif
 
 %install
+%include %{SOURCE103}
+
 %meson_install
+
+%include %{SOURCE104}
+%include %{SOURCE203}
+%include %{SOURCE303}
 
 # likewise glvnd
 rm -vf %{buildroot}%{_libdir}/libGLX_mesa.so
