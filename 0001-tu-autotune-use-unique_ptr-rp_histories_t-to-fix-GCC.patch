@@ -1,0 +1,153 @@
+From 8580c2692629d0451d0ef07f07d983b6951ef360 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jos=C3=A9=20Exp=C3=B3sito?= <jexposit@redhat.com>
+Date: Thu, 19 Nov 2026 11:02:59 +0100
+Subject: [PATCH] tu/autotune: use unique_ptr<rp_histories_t> to fix GCC 11
+ build
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+tu_autotune.h declares rp_history as a forward-declared struct and uses
+it as the value type of an std::unordered_map member:
+
+  struct rp_history;
+  [...]
+  using rp_histories_t = std::unordered_map<rp_key, rp_history, rp_hash>;
+  rp_histories_t rp_histories;
+
+GCC 11 fails to compile with the following error:
+
+  /usr/include/c++/11/bits/stl_pair.h:218:11: error:
+  'std::pair<_T1, _T2>::second' has incomplete type
+    218 |       _T2 second;                ///< The second member
+        |           ^~~~~~
+  In file included from mesa/src/freedreno/vulkan/tu_autotune.cc:6:
+  ../../mesa/src/freedreno/vulkan/tu_autotune.h:170:11:
+  note: forward declaration of 'struct tu_autotune::rp_history'
+    170 |    struct rp_history;
+        |           ^~~~~~~~~~
+
+GCC 11 requires the value type of std::unordered_map to be complete at
+the point the class template is instantiated. rp_history is only fully
+defined later in tu_autotune.cc.
+
+Fix this by wrapping the map in a unique_ptr, which only requires the
+value type to be complete when dereferenced (in the .cc file where
+rp_history is fully defined), not at instantiation.
+
+Cc: mesa-stable
+Assisted-by: LLM
+Signed-off-by: José Expósito <jexposit@redhat.com>
+---
+ src/freedreno/vulkan/tu_autotune.cc | 27 ++++++++++++++-------------
+ src/freedreno/vulkan/tu_autotune.h  |  7 +++++--
+ 2 files changed, 19 insertions(+), 15 deletions(-)
+
+diff --git a/src/freedreno/vulkan/tu_autotune.cc b/src/freedreno/vulkan/tu_autotune.cc
+index 2e3dd4d3d72..830b1302c84 100644
+--- a/src/freedreno/vulkan/tu_autotune.cc
++++ b/src/freedreno/vulkan/tu_autotune.cc
+@@ -1381,8 +1381,8 @@ tu_autotune::rp_history_handle
+ tu_autotune::find_rp_history(const rp_key &key)
+ {
+    std::shared_lock lock(rp_mutex);
+-   auto it = rp_histories.find(key);
+-   if (it != rp_histories.end())
++   auto it = rp_histories->find(key);
++   if (it != rp_histories->end())
+       return rp_history_handle(it->second);
+ 
+    return rp_history_handle(nullptr);
+@@ -1397,10 +1397,10 @@ tu_autotune::find_or_create_rp_history(const rp_key &key)
+ 
+    /* If we reach here, we have to create a new history. */
+    std::unique_lock lock(rp_mutex);
+-   auto it = rp_histories.find(key);
+-   if (it != rp_histories.end())
++   auto it = rp_histories->find(key);
++   if (it != rp_histories->end())
+       return it->second; /* Another thread created the history while we were waiting for the lock. */
+-   auto history = rp_histories.emplace(std::make_pair(key, key.hash));
++   auto history = rp_histories->emplace(std::make_pair(key, key.hash));
+    return rp_history_handle(history.first->second);
+ }
+ 
+@@ -1417,18 +1417,18 @@ tu_autotune::reap_old_rp_histories()
+    {
+       /* Quicker non-unique lock, should hit this path mostly. */
+       std::shared_lock lock(rp_mutex);
+-      if (rp_histories.size() <= MAX_RP_HISTORIES)
++      if (rp_histories->size() <= MAX_RP_HISTORIES)
+          return;
+    }
+ 
+    std::unique_lock lock(rp_mutex);
+-   size_t og_size = rp_histories.size();
++   size_t og_size = rp_histories->size();
+    if (og_size <= MAX_RP_HISTORIES)
+       return;
+ 
+    std::vector<rp_histories_t::iterator> candidates;
+    candidates.reserve(og_size);
+-   for (auto it = rp_histories.begin(); it != rp_histories.end(); ++it) {
++   for (auto it = rp_histories->begin(); it != rp_histories->end(); ++it) {
+       if (it->second.refcount.load(std::memory_order_relaxed) == 0)
+          candidates.push_back(it);
+    }
+@@ -1453,11 +1453,11 @@ tu_autotune::reap_old_rp_histories()
+       rp_history &history = (*it)->second;
+       if (history.refcount.load(std::memory_order_acquire) == 0) {
+          at_log_base("reaping RP history %016" PRIx64, history.hash);
+-         rp_histories.erase(*it);
++         rp_histories->erase(*it);
+       }
+    }
+ 
+-   at_log_base("reaped old RP histories %zu -> %zu", og_size, rp_histories.size());
++   at_log_base("reaped old RP histories %zu -> %zu", og_size, rp_histories->size());
+ }
+ 
+ std::shared_ptr<tu_autotune::rp_entry_batch>
+@@ -1506,8 +1506,8 @@ tu_autotune::cleanup_latency_tracking()
+ 
+       /* Check if corresponding rp_history has cleared its latency_risk flag. */
+       if (tracker.info.seen_latency_spike) {
+-         auto history_it = rp_histories.find(rp_key { rp_hash });
+-         if (history_it == rp_histories.end() || !history_it->second.preempt_optimize.is_latency_sensitive() ||
++         auto history_it = rp_histories->find(rp_key { rp_hash });
++         if (history_it == rp_histories->end() || !history_it->second.preempt_optimize.is_latency_sensitive() ||
+              history_it->second.last_use_ts.load(std::memory_order_relaxed) + FORGET_ABOUT_DELAY_AFTER_NS < now) {
+             tracker.info.seen_latency_spike = false;
+             at_log_preempt_h("clearing latency-sensitive flag", rp_hash);
+@@ -1670,7 +1670,8 @@ tu_autotune::on_submit(struct tu_cmd_buffer **cmd_buffers, uint32_t cmd_buffer_c
+ }
+ 
+ tu_autotune::tu_autotune(struct tu_device *device, VkResult &result)
+-    : device(device), supported_mod_flags(get_supported_mod_flags(device)), active_config(get_env_config())
++    : device(device), supported_mod_flags(get_supported_mod_flags(device)), active_config(get_env_config()),
++      rp_histories(std::make_unique<rp_histories_t>())
+ {
+    tu_bo_suballocator_init(&suballoc, device, 128 * 1024, TU_BO_ALLOC_INTERNAL_RESOURCE, "autotune_suballoc");
+ 
+diff --git a/src/freedreno/vulkan/tu_autotune.h b/src/freedreno/vulkan/tu_autotune.h
+index f2271ea7c47..fb780e8d748 100644
+--- a/src/freedreno/vulkan/tu_autotune.h
++++ b/src/freedreno/vulkan/tu_autotune.h
+@@ -213,9 +213,12 @@ struct tu_autotune {
+       }
+    };
+ 
+-   /* A map between the hash of an RP and the historical state of the RP. Synchronized by rp_mutex. */
++   /* A map between the hash of an RP and the historical state of the RP. Synchronized by rp_mutex.
++    *
++    * Stored via unique_ptr because rp_history is incomplete at this point in the header.
++    */
+    using rp_histories_t = std::unordered_map<rp_key, rp_history, rp_hash>;
+-   rp_histories_t rp_histories;
++   std::unique_ptr<rp_histories_t> rp_histories;
+    std::shared_mutex rp_mutex;
+    uint64_t last_reap_ts = 0;
+ 
+-- 
+2.56.1
+

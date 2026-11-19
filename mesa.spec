@@ -114,6 +114,9 @@ Source13:       https://crates.io/api/v1/crates/syn/%{rust_syn_ver}/download#/sy
 Source14:       https://crates.io/api/v1/crates/unicode-ident/%{rust_unicode_ident_ver}/download#/unicode-ident-%{rust_unicode_ident_ver}.tar.gz
 Source15:       https://crates.io/api/v1/crates/rustc-hash/%{rustc_hash_ver}/download#/rustc-hash-%{rustc_hash_ver}.tar.gz
 
+# Fix Freedreno compilation with GCC 11 (CentOS 9)
+Patch0:         0001-tu-autotune-use-unique_ptr-rp_histories_t-to-fix-GCC.patch
+
 BuildRequires:  meson
 BuildRequires:  gcc
 BuildRequires:  gcc-c++
