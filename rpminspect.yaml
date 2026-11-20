@@ -1,0 +1,4 @@
+---
+annocheck:
+  extra_opts:
+    hardened: --skip-lto

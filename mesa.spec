@@ -74,9 +74,7 @@
 %global vendor_nvk_crates 1
 %endif
 
-# We've gotten a report that enabling LTO for mesa breaks some games. See
-# https://bugzilla.redhat.com/show_bug.cgi?id=1862771 for details.
-# Disable LTO for now
+# LTO is not supported: https://gitlab.freedesktop.org/mesa/mesa/-/merge_requests/39671
 %global _lto_cflags %nil
 
 Name:           mesa
