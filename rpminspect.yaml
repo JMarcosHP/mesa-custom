@@ -2,3 +2,7 @@
 annocheck:
   extra_opts:
     hardened: --skip-lto
+badfuncs:
+  allowed:
+    /usr/lib*/libvulkan_freedreno.so:
+      - inet_addr
