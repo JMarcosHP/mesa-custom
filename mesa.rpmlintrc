@@ -1,0 +1,13 @@
+# Vulkan ICDs, layers, and plugin-style .so files are loaded via dlopen() at
+# runtime by the Vulkan loader. They intentionally have no versioned SONAME.
+addFilter(r"invalid-soname.*(libvulkan_\w+|libVkLayer_MESA_device_select|libspirv_to_dxil|libteflon)\.so")
+
+# mesa-filesystem only owns two empty directories (%{_libdir}/dri and
+# %{_datadir}/drirc.d) and a doc file. The .so files visible in those dirs
+# belong to other subpackages. mesa-filesystem just creates the scaffold.
+addFilter(r"mesa-filesystem.*no-binary")
+
+# libclc ships OpenCL bitcode (.bc files), not ELF objects, so rpm's
+# auto-dependency scanner cannot detect it. The explicit Requires: is necessary.
+# Do NOT enable this filter in CenOS, libclc is not required in that OS.
+addFilter(r"explicit-lib-dependency libclc\d+")
